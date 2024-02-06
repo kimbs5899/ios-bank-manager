@@ -7,11 +7,9 @@ final class BankManager {
     private var isRunning: Bool = true
     private let depositSemaphore = DispatchSemaphore(value: 2)
     private let loanSemaphore = DispatchSemaphore(value: 1)
-    private let group1 = DispatchGroup()
-    private let group2 = DispatchGroup()
+    private let depositGroup = DispatchGroup()
+    private let loanGroup = DispatchGroup()
 
-    
-    
     init(bank: Bank) {
         self.bank = bank
     }
@@ -40,17 +38,11 @@ extension BankManager {
         switch menu {
         case .one:
             bank.enqueueCustomer()
-            while !bank.fetchCustomerIsEmpty() {
-                if bank.fetchCustomerWaitingList().peek()?.bankServices == .deposit {
-                        self.depositBanker()
-                        self.depositBanker()
-                } else {
-                        self.loanBanker()
-                }
-            }
+            bankBusinessProcess()
             
-            group1.wait()
-            group2.wait()
+            depositGroup.wait()
+            loanGroup.wait()
+            
             view.printMenuMessage(menu: CustomStringPrintMenu.resultBusiness(bank.fetchCustomerCount(), bank.fetchTime()))
             formIsRunning()
         case .two:
@@ -59,61 +51,50 @@ extension BankManager {
         }
     }
     
+    private func bankBusinessProcess() {
+        while !bank.fetchCustomerIsEmpty() {
+            checkBusinessService()
+        }
+    }
+    
+    private func checkBusinessService() {
+        if bank.fetchCustomerWaitingList().peek()?.bankServices == .deposit {
+            self.banker(semphore: self.depositSemaphore, group: self.depositGroup, usedTime: BusinessHour.deposit)
+            self.banker(semphore: self.depositSemaphore, group: self.depositGroup, usedTime: BusinessHour.deposit)
+        } else {
+            self.banker(semphore: self.loanSemaphore, group: self.loanGroup, usedTime: BusinessHour.loan)
+        }
+    }
+    
     private func dequeueCustomer() {
         bank.dequeueCustomer()
     }
-    
-    private func depositBanker() {
+                                          
+    private func banker(semphore: DispatchSemaphore, group: DispatchGroup, usedTime: TimeInterval) {
         guard let customer = bank.customerPeek() else {
             return
         }
-
-        depositSemaphore.wait()
-        performDepositBusiness(for: customer, with: customer.bankServices)
+        
+        semphore.wait()
+        performBusiness(semphore: semphore, group: group, for: customer, with: customer.bankServices, usedTime: usedTime)
     }
     
-    private func performDepositBusiness(for customer: Customer, with service: BankBusiness) {
-        self.group1.enter()
+    private func performBusiness(semphore: DispatchSemaphore, group: DispatchGroup, for customer: Customer, with service: BankBusiness, usedTime: TimeInterval) {
+        group.enter()
+        
         view.printMenuMessage(menu: CustomStringPrintMenu.startCustomerBusiness(customer.ticketNumber, service.rawValue))
         dequeueCustomer()
-        bank.addProcessTime(BusinessHour.deposit)
+        bank.addProcessTime(BusinessHour.loan)
         
-        DispatchQueue.global().asyncAfter(deadline: .now() + 0.7  , execute: { [weak self] in
+        DispatchQueue.global().asyncAfter(deadline: .now() + usedTime , execute: { [weak self] in
             guard let self = self else {
                 return
             }
             
-            DispatchQueue.global().async(group: self.group1) {
+            DispatchQueue.global().async(group: self.loanGroup) {
                 self.view.printMenuMessage(menu: CustomStringPrintMenu.endCustomerBusiness(customer.ticketNumber, service.rawValue))
-                self.depositSemaphore.signal()
-                self.group1.leave()
-                }
-            })
-        }
-                                          
-    private func loanBanker() {
-        guard let customer = bank.customerPeek() else {
-            return
-        }
-        
-        loanSemaphore.wait()
-        performLoanBusiness(for: customer, with: customer.bankServices)
-    }
-    
-    private func performLoanBusiness(for customer: Customer, with service: BankBusiness) {
-        self.group2.enter()
-        view.printMenuMessage(menu: CustomStringPrintMenu.startCustomerBusiness(customer.ticketNumber, service.rawValue))
-        dequeueCustomer()
-        bank.addProcessTime(BusinessHour.laon)
-        
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1.1  , execute: { [weak self] in
-            guard let self = self else {
-                return
-            }
-            DispatchQueue.global().async(group: self.group2) {
-                self.view.printMenuMessage(menu: CustomStringPrintMenu.endCustomerBusiness(customer.ticketNumber, service.rawValue))
-                self.loanSemaphore.signal()
-                self.group2.leave()
+                semphore.signal()
+                group.leave()
             }
         })
     }
@@ -123,11 +104,6 @@ extension BankManager {
             return CustomStringPrintMenu.isEmptyText.description
         }
         return userInput
-    }
-    
-    private func workProcessTime(_ time: TimeInterval) {
-        Thread.sleep(forTimeInterval: time)
-        
     }
     
     func fetchIsRunning() -> Bool {

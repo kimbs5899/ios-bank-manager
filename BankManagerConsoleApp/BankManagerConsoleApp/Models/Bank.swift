@@ -16,17 +16,20 @@ struct Bank {
 // MARK: - Bank Method
 extension Bank {
     
+    private func createCustomer(_ number: Int) -> Customer {
+        let custoemr = Customer(numberTicket: number, bankServices: BankBusiness.allCases.randomElement() ?? .deposit)
+        return custoemr
+    }
+    
     func enqueueCustomer() {
         for number in 1...fetchCustomerCount() {
-            let custoemr = Customer(numberTicket: number, bankServices: BankBusiness.allCases.randomElement() ?? .deposit)
-            customerWaitingList.enqueue(data: custoemr)
+            customerWaitingList.enqueue(data: createCustomer(number))
         }
     }
     
     func dequeueCustomer() {
         customerWaitingList.dequeue()
     }
-    
     
     func fetchCustomerWaitingList() -> Queue<Customer> {
         return customerWaitingList
