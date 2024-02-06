@@ -6,9 +6,8 @@ struct Bank {
     private var businessHour: Double = 0.0
     
     private let customerCount: Int = Int.random(in: 10...30)
-    private let customerWaitingLoanList: Queue = Queue<Customer>()
-    private let customerWaitingDepositList: Queue = Queue<Customer>()
-    
+    private let customerWaitingList: Queue = Queue<Customer>()
+
     init(bankEmployeeCount: Int) {
         self.bankEmployeeCount = bankEmployeeCount
     }
@@ -17,55 +16,39 @@ struct Bank {
 // MARK: - Bank Method
 extension Bank {
     
-    func enqueueLoanCustomer(customerInfo: Customer) {
-        customerWaitingLoanList.enqueue(data: customerInfo)
+    func enqueueCustomer() {
+        for number in 1...fetchCustomerCount() {
+            let custoemr = Customer(numberTicket: number, bankServices: BankBusiness.allCases.randomElement() ?? .deposit)
+            customerWaitingList.enqueue(data: custoemr)
+        }
     }
     
-    func enqueueDepositCustomer(customerInfo: Customer) {
-        customerWaitingDepositList.enqueue(data: customerInfo)
+    func dequeueCustomer() {
+        customerWaitingList.dequeue()
     }
     
-    func dequeueLoanCustomer() {
-        customerWaitingLoanList.dequeue()
-    }
     
-    func dequeueDepositCustomer() {
-        customerWaitingDepositList.dequeue()
-    }
-    
-    func fetchCustomerWaitingLoanList() -> Queue<Customer> {
-        return customerWaitingLoanList
-    }
-    
-    func fetchCustomerWaitingDepositList() -> Queue<Customer> {
-        return customerWaitingDepositList
+    func fetchCustomerWaitingList() -> Queue<Customer> {
+        return customerWaitingList
     }
     
     func fetchCustomerCount() -> Int {
         return customerCount
     }
     
-    func customerLoanPeek() -> Customer? {
-        return customerWaitingLoanList.peek()
+    func customerPeek() -> Customer? {
+        return customerWaitingList.peek()
     }
     
-    func customerDepositPeek() -> Customer? {
-        return customerWaitingDepositList.peek()
-    }
-    
-    func fetchLoanCustomerIsEmpty() -> Bool {
-        return customerWaitingLoanList.isEmpty()
-    }
-    
-    func fetchDepositCustomerIsEmpty() -> Bool {
-        return customerWaitingDepositList.isEmpty()
+    func fetchCustomerIsEmpty() -> Bool {
+        return customerWaitingList.isEmpty()
     }
     
     func fetchTime() -> Double {
-        return businessHour.formatTimeToTwoDecimalPlaces()
+        return businessHour.formatTimeToDecimalPlaces(2)
     }
     
-    mutating func addProcessTime(_ time: Double) {
-        businessHour += time
+    mutating func addProcessTime(_ time: TimeInterval) {
+        businessHour += Double(time)
     }
 }

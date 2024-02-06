@@ -2,7 +2,8 @@ import Foundation
 
 extension Double {
     
-    func formatTimeToTwoDecimalPlaces() -> Double {
-        return Double(String(format: CustomStringPrintMenu.format.description, self)) ?? 0.0
+    func formatTimeToDecimalPlaces(_ decimalPlaces: Int) -> Double {
+        let formatString = "%.\(decimalPlaces)f"
+        return Double(String(format: formatString, self)) ?? 0.0
     }
 }

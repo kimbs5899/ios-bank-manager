@@ -1,8 +1,8 @@
 import Foundation
 
 func openBank() {
-    let bankEmployee = Bank(bankEmployeeCount: 3)
-    var bankManager = BankManager(bank: bankEmployee)
+    let bank = Bank(bankEmployeeCount: 3)
+    let bankManager = BankManager(bank: bank)
 
     while bankManager.fetchIsRunning() {
         bankManager.startBusiness()

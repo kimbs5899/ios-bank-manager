@@ -13,8 +13,8 @@ enum CustomStringPrintMenu: CustomStringConvertible {
     case format
     case printMenuText
     case isEmptyText
-    case startCustomerBusiness(Int, Task)
-    case endCustomerBusiness(Int, Task)
+    case startCustomerBusiness(Int, String)
+    case endCustomerBusiness(Int, String)
     case resultBusiness(Int, Double)
     
     var description: String {

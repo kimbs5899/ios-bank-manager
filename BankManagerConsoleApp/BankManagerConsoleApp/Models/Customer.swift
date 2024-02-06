@@ -2,11 +2,11 @@ import Foundation
 
 struct Customer {
 
-    let numberTicket: Int
-    let bankServices: Task?
+    let ticketNumber: Int
+    let bankServices: BankBusiness
     
-    init(numberTicket: Int, bankServices: Task? = nil) {
-        self.numberTicket = numberTicket
+    init(numberTicket: Int, bankServices: BankBusiness) {
+        self.ticketNumber = numberTicket
         self.bankServices = bankServices
     }
 }
