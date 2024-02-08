@@ -6,8 +6,8 @@ class MainView: UIView {
         let button = UIButton()
         let label = UILabel()
         button.setTitle("고객 10명 추가", for: .normal)
-        button.setTitleColor(.blue, for: .normal)
-        button.setTitleColor(.black, for: .highlighted)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.setTitleColor(.blue, for: .highlighted)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         return button
     }()
@@ -15,8 +15,8 @@ class MainView: UIView {
     lazy var resetButton: UIButton = {
         let button = UIButton()
         button.setTitle("초기화", for: .normal)
-        button.setTitleColor(.red, for: .normal)
-        button.setTitleColor(.black, for: .highlighted)
+        button.setTitleColor(.systemRed, for: .normal)
+        button.setTitleColor(.red, for: .highlighted)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         return button
     }()
@@ -33,18 +33,18 @@ class MainView: UIView {
         let label = UILabel()
         label.text = "업무시간 - 04:33:252"
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 18)
+        label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         return label
     }()
     
     lazy var waitListTitleView: UIView = {
         let view = UIView()
-        view.backgroundColor = .green
+        view.backgroundColor = .systemGreen
         view.contentMode = .center
         
         let label = UILabel()
         label.text = "대기중"
-        label.font = UIFont.systemFont(ofSize: 30)
+        label.font = UIFont.systemFont(ofSize: 26, weight: .bold)
         label.textColor = .white
         label.textAlignment = .center
         
@@ -55,10 +55,26 @@ class MainView: UIView {
         return view
     }()
     
-    lazy var waitListStackView: UIStackView = {
-        var stack = UIStackView(arrangedSubviews: [waitListTitleView, testLabel1, testLabel2, testLabel3])
+    lazy var waitListContentStackView: UIStackView = {
+        
+        var result: [UILabel] = []
+        for _ in 1...3 {
+            result.append(addLabel())
+        }
+        
+        var stack = UIStackView(arrangedSubviews: result)
+        stack.spacing = 10
         stack.axis = .vertical
-        stack.distribution = .fillEqually
+        stack.distribution = .fill
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    lazy var waitListStackView: UIStackView = {
+        var stack = UIStackView(arrangedSubviews: [waitListTitleView, waitListContentStackView])
+        stack.axis = .vertical
+        stack.spacing = 10
+        stack.distribution = .fillProportionally
         stack.alignment = .fill
         return stack
     }()
@@ -70,7 +86,7 @@ class MainView: UIView {
         
         let label = UILabel()
         label.text = "업무중"
-        label.font = UIFont.systemFont(ofSize: 30)
+        label.font = UIFont.systemFont(ofSize: 26, weight: .bold)
         label.textColor = .white
         label.textAlignment = .center
         
@@ -81,32 +97,26 @@ class MainView: UIView {
         return view
     }()
     
-    lazy var testLabel1: UILabel = {
-       let label = UILabel()
-        label.text = "5 - 예금"
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 15)
-        return label
-    }()
-    lazy var testLabel2: UILabel = {
-       let label = UILabel()
-        label.text = "5 - 예금"
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 15)
-        return label
-    }()
-    lazy var testLabel3: UILabel = {
-       let label = UILabel()
-        label.text = "5 - 예금"
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 15)
-        return label
+    lazy var businessContentStackView: UIStackView = {
+        
+        var result: [UILabel] = []
+        for _ in 1...3 {
+            result.append(addLabel())
+        }
+        
+        var stack = UIStackView(arrangedSubviews: result)
+        stack.spacing = 10
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.alignment = .fill
+        return stack
     }()
     
     lazy var businessListStackView: UIStackView = {
-        var stack = UIStackView(arrangedSubviews: [businessTitleView])
+        var stack = UIStackView(arrangedSubviews: [businessTitleView, businessContentStackView])
         stack.axis = .vertical
-        stack.distribution = .fillEqually
+        stack.spacing = 10
+        stack.distribution = .fillProportionally
         stack.alignment = .fill
         return stack
     }()
@@ -168,4 +178,13 @@ class MainView: UIView {
         secondStackView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
     }
     
+    func addLabel() -> UILabel {
+        lazy var label = UILabel()
+        label.text = "5 - 예금"
+        label.textAlignment = .center
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 20)
+        label.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+        return label
+    }
 }
